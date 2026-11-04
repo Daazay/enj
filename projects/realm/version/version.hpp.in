@@ -1,52 +1,60 @@
 #pragma once
 
+#include <realm/base/common/typedefs.hpp>
+#include <realm/base/common/defines.hpp>
+
 #include <compare>
 #include <cstdint>
 #include <string_view>
 
-namespace realm::config
+namespace realm::version
 {
 
 struct Version
 {
 public:
     constexpr Version() noexcept = default;
-    constexpr explicit Version(std::uint64_t packed) noexcept
+    constexpr explicit Version(u64 packed) noexcept
         : _packed{ packed }
     {}
 
-    constexpr explicit Version(std::uint8_t major, std::uint8_t minor, std::uint16_t patch, std::uint32_t commit) noexcept
+    constexpr explicit Version(u8 major, u8 minor, u16 patch, u32 commit) noexcept
         : _packed{ pack(major, minor, patch, commit) }
     {}
 
 public:
-    static constexpr std::uint64_t pack(std::uint8_t major, std::uint8_t minor, std::uint16_t patch, std::uint32_t commit) noexcept
+    RE_FORCE_INLINE static constexpr u64 pack(u8 major, u8 minor, u16 patch, u32 commit) noexcept
     {
-        return (static_cast<std::uint64_t>(commit) << 0)  |
-               (static_cast<std::uint64_t>(patch)  << 32) |
-               (static_cast<std::uint64_t>(minor)  << 48) |
-               (static_cast<std::uint64_t>(major)  << 56);
+        return (static_cast<u64>(commit) << 0)  |
+               (static_cast<u64>(patch)  << 32) |
+               (static_cast<u64>(minor)  << 48) |
+               (static_cast<u64>(major)  << 56);
     }
 
 public:
-    constexpr std::uint64_t packed() const noexcept { return _packed; }
-    constexpr std::uint8_t  major() const noexcept { return static_cast<std::uint8_t>(_packed >> 56); }
-    constexpr std::uint8_t  minor() const noexcept { return static_cast<std::uint8_t>(_packed >> 48); }
-    constexpr std::uint16_t patch() const noexcept { return static_cast<std::uint16_t>(_packed >> 32); }
-    constexpr std::uint32_t commit() const noexcept { return static_cast<std::uint32_t>(_packed >> 0); }
+    RE_FORCE_INLINE constexpr u64 packed() const noexcept { return _packed; }
+    RE_FORCE_INLINE constexpr u8  major() const noexcept { return static_cast<u8>(_packed >> 56); }
+    RE_FORCE_INLINE constexpr u8  minor() const noexcept { return static_cast<u8>(_packed >> 48); }
+    RE_FORCE_INLINE constexpr u16 patch() const noexcept { return static_cast<u16>(_packed >> 32); }
+    RE_FORCE_INLINE constexpr u32 commit() const noexcept { return static_cast<u32>(_packed >> 0); }
 
 public:
     friend constexpr auto operator<=>(Version, Version) noexcept = default;
     friend constexpr bool operator==(Version, Version) noexcept  = default;
 
 private:
-    std::uint64_t _packed{0};
+    u64 _packed{0};
 };
+
+inline constexpr Version k_version = Version{ static_cast<u8>(${VERSION_MAJOR}),
+                                              static_cast<u8>(${VERSION_MINOR}),
+                                              static_cast<u16>(${VERSION_ALTER}),
+                                              static_cast<u32>(0x${GIT_COMMIT}) };
 
 // Pre-release tag ("dev", "rc1", ...), or empty when there is none.
 inline constexpr std::string_view k_version_sub = "${VERSION_SUB}";
 
-// human-readable string
+// human-readable version string
 inline constexpr std::string_view k_version_str = k_version_sub.empty()
     ? "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_ALTER}-${GIT_COMMIT}"
     : "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_ALTER}-${VERSION_SUB}-${GIT_COMMIT}";

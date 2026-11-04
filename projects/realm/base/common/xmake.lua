@@ -1,0 +1,5 @@
+target("realm-base-common")
+    set_kind("headeronly")
+    add_includedirs("include", {public = true})
+    add_headerfiles("include/(realm/base/common/*.hpp)")
+target_end()
