@@ -1,0 +1,26 @@
+# top-most EditorConfig file
+root = true
+
+# Defaults for every file
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+
+# C / C++ sources
+[*.{c,cc,cpp,cxx,c++,cp}]
+indent_size = 4
+
+# C / C++ headers & inline/template implementations
+[*.{h,hh,hpp,hxx,h++,hp,inl,ipp,tpp,tli,tlh}]
+indent_size = 4
+
+# Lua
+[*.lua]
+indent_size = 2
+
+# Markdown: two trailing spaces are a hard line break - never strip them.
+[*.md]
+trim_trailing_whitespace = false

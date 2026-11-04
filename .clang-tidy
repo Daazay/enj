@@ -1,0 +1,84 @@
+---
+SystemHeaders: false
+HeaderFilterRegex: 'projects/.*/(include|src)'
+
+Checks: >
+  bugprone-*,
+  -bugprone-easily-swappable-parameters,
+  performance-*,
+  modernize-*,
+  -modernize-use-trailing-return-type,
+  -modernize-avoid-c-arrays,
+  clang-analyzer-core.*,
+  clang-analyzer-cplusplus.*,
+  clang-analyzer-deadcode.*,
+  clang-analyzer-security.*,
+  clang-analyzer-unix.*,
+  clang-analyzer-optin.*,
+  cppcoreguidelines-*,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -cppcoreguidelines-macro-usage,
+  -cppcoreguidelines-owning-memory,
+  -cppcoreguidelines-pro-type-vararg,
+  -cppcoreguidelines-avoid-non-const-global-variables,
+  -cppcoreguidelines-avoid-do-while,
+  -cppcoreguidelines-pro-bounds-constant-array-index,
+  -cppcoreguidelines-pro-bounds-pointer-arithmetic,
+  -cppcoreguidelines-pro-type-union-access,
+  -cppcoreguidelines-avoid-c-arrays,
+  -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+  readability-*,
+  -readability-magic-numbers,
+  -readability-redundant-access-specifiers,
+  -readability-uppercase-literal-suffix,
+  -readability-identifier-length,
+  -readability-function-cognitive-complexity,
+  -readability-else-after-return,
+  misc-*,
+  -misc-include-cleaner,
+  -misc-non-private-member-variables-in-classes,
+  cert-*,
+
+WarningsAsErrors: '*'
+
+CheckOptions:
+  # Types, structs, enums - PascalCase
+  - { key: readability-identifier-naming.ClassCase,     value: CamelCase }
+  - { key: readability-identifier-naming.StructCase,    value: CamelCase }
+  - { key: readability-identifier-naming.EnumCase,      value: CamelCase }
+  - { key: readability-identifier-naming.UnionCase,     value: CamelCase }
+  - { key: readability-identifier-naming.TypeAliasCase, value: lower_case }
+  - { key: readability-identifier-naming.TypedefCase,   value: CamelCase }
+
+  # Functions and methods - camelCase
+  - { key: readability-identifier-naming.FunctionCase, value: camelBack }
+  - { key: readability-identifier-naming.MethodCase,   value: camelBack }
+
+  # Member variables
+  - { key: readability-identifier-naming.MemberCase,            value: lower_case }
+  - { key: readability-identifier-naming.PrivateMemberCase,     value: lower_case }
+  - { key: readability-identifier-naming.PrivateMemberPrefix,   value: _ }
+  - { key: readability-identifier-naming.ProtectedMemberCase,   value: lower_case }
+  - { key: readability-identifier-naming.ProtectedMemberPrefix, value: _ }
+
+  # Local variables and parameters
+  - { key: readability-identifier-naming.LocalVariableCase,    value: lower_case }
+  - { key: readability-identifier-naming.ParameterCase,        value: lower_case }
+
+  # Enums – lowercase (snake_case) and no prefix
+  - { key: readability-identifier-naming.EnumConstantCase,        value: lower_case }
+
+  # Namespaces - snake_case
+  - { key: readability-identifier-naming.NamespaceCase,           value: lower_case }
+
+  # Template parameters - single uppercase letter or PascalCase
+  - { key: readability-identifier-naming.TemplateParameterCase,   value: CamelCase }
+
+  # Macros - UPPER_SNAKE
+  - { key: readability-identifier-naming.MacroDefinitionCase,     value: UPPER_CASE }
+
+  # Constants (constexpr / consteval)
+  - { key: readability-identifier-naming.StaticConstantCase,      value: CamelCase }
+  - { key: readability-identifier-naming.StaticConstantPrefix,    value: k         }
+  - { key: readability-identifier-naming.ConstantMemberCase,      value: CamelCase }
+  - { key: readability-identifier-naming.ConstantMemberPrefix,    value: k         }

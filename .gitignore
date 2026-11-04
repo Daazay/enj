@@ -1,0 +1,10 @@
+# xmake
+/.xmake/
+/build/
+/out/
+
+# IDE / Editors
+.vscode/
+.clangd/
+compile_commands.json
+.cache/

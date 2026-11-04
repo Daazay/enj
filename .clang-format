@@ -1,0 +1,65 @@
+---
+BasedOnStyle: LLVM
+Language: Cpp
+TabWidth: 4
+IndentWidth: 4
+ColumnLimit: 120
+AccessModifierOffset: -4
+AlignConsecutiveAssignments:
+  Enabled: true
+AlignConsecutiveDeclarations:
+  Enabled: true
+AlignConsecutiveMacros:
+  Enabled: true
+AlignEscapedNewlines: Left
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortEnumsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortLambdasOnASingleLine: Inline
+AlwaysBreakTemplateDeclarations: Yes
+BreakBeforeBraces: Allman
+BreakStringLiterals: false
+Cpp11BracedListStyle: false
+IndentPPDirectives: BeforeHash
+InsertBraces: true
+InsertNewlineAtEOF: true
+KeepEmptyLinesAtTheStartOfBlocks: false
+MaxEmptyLinesToKeep: 2
+NamespaceIndentation: None
+PackConstructorInitializers: Never
+PointerAlignment: Left
+QualifierAlignment: Right
+ReferenceAlignment: Left
+ShortNamespaceLines: 0
+SortIncludes: true
+IncludeBlocks: Regroup
+IncludeCategories:
+  # realm headers "realm/*"
+  - Regex:           '^"realm/.*"'
+    Priority:        1
+
+  # other headers "*"
+  - Regex:           '^".*"'
+    Priority:        2
+
+  # realm headers <realm/*>
+  - Regex:           '^<realm/.*>'
+    Priority:        3
+
+  # system headers <header>
+  - Regex:           '^<[^/]*>$'
+    Priority:        4
+
+  # third-party headers <lib/header>
+  - Regex:           '^<.*>$'
+    Priority:        5
+
+  # fallback
+  - Regex:           '.*'
+    Priority:        6
+
+SpaceAfterTemplateKeyword: false
+SpacesBeforeTrailingComments: 2
+SpaceInEmptyParentheses: false
+SpacesInCStyleCastParentheses: false
+SpacesInParentheses: false
