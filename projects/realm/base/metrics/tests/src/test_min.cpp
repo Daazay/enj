@@ -20,7 +20,7 @@ TYPED_TEST_SUITE(MetricMinTest, StoragePolicies);
 
 TYPED_TEST(MetricMinTest, StartsAtNumericLimit)
 {
-    MetricMin<i64, max_value<i64>, TypeParam> metric;
+    MetricMin<i64, max_value<i64>, TypeParam> const metric;
     EXPECT_EQ(metric.get(), max_value<i64>);
 }
 

@@ -20,7 +20,7 @@ TYPED_TEST_SUITE(MetricHistogramTest, StoragePolicies);
 
 TYPED_TEST(MetricHistogramTest, StartsWithEmptyBucketsAndRetainsBounds)
 {
-    MetricHistogram<i64, 3, TypeParam> histogram{ { 10, 20 } };
+    MetricHistogram<i64, 3, TypeParam> const histogram{ { 10, 20 } };
     EXPECT_EQ(histogram.bound(0), 10);
     EXPECT_EQ(histogram.bound(1), 20);
     EXPECT_EQ(histogram.total(), 0u);

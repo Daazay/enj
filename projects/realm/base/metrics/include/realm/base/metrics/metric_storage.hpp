@@ -96,8 +96,8 @@ public:
         return referenceAt<any_metric_const_ref>(*this, indexOf(id).value_or(metrics_count));
     }
 
-    Opt<any_metric_ref>       get(MetricId) &&      = delete;
-    Opt<any_metric_const_ref> get(MetricId) const&& = delete;
+    RE_NODISCARD Opt<any_metric_ref> get(MetricId) &&            = delete;
+    RE_NODISCARD Opt<any_metric_const_ref> get(MetricId) const&& = delete;
 
 public:
     RE_NODISCARD constexpr Opt<any_metric_ref> getByName(std::string_view name) & noexcept
@@ -110,8 +110,8 @@ public:
         return referenceAt<any_metric_const_ref>(*this, indexOfName(name).value_or(metrics_count));
     }
 
-    Opt<any_metric_ref>       getByName(std::string_view) &&      = delete;
-    Opt<any_metric_const_ref> getByName(std::string_view) const&& = delete;
+    RE_NODISCARD Opt<any_metric_ref> getByName(std::string_view) &&            = delete;
+    RE_NODISCARD Opt<any_metric_const_ref> getByName(std::string_view) const&& = delete;
 
 private:
     template<typename Reference, usize Index = 0, typename Self>

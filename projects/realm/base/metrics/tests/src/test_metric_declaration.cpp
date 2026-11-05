@@ -98,10 +98,8 @@ TEST(MetricDeclarationTest, SupportsReflectedAndCustomNames)
 
 TEST(MetricDeclarationTest, UnknownMetadataReturnsEmpty)
 {
-    auto const unknown_id = static_cast<MetricId>(99);
-
-    EXPECT_FALSE(EngineMetrics::indexOf(unknown_id));
-    EXPECT_FALSE(EngineMetrics::name(unknown_id));
+    EXPECT_FALSE(EngineMetrics::indexOf(unknown_metric_id));
+    EXPECT_FALSE(EngineMetrics::name(unknown_metric_id));
     EXPECT_FALSE(EngineMetrics::indexOfName("missing"));
     EXPECT_FALSE(EngineMetrics::idByName("missing"));
     EXPECT_FALSE(EngineMetrics::idByName("drawCalls"));

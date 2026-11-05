@@ -20,7 +20,7 @@ TYPED_TEST_SUITE(MetricGaugeTest, StoragePolicies);
 
 TYPED_TEST(MetricGaugeTest, StartsAtConfiguredValue)
 {
-    MetricGauge<i64, -2, TypeParam> gauge;
+    MetricGauge<i64, -2, TypeParam> const gauge;
     EXPECT_EQ(gauge.get(), -2);
 }
 
@@ -48,7 +48,7 @@ TEST(AtomicMetricGaugeTest, AccumulatesConcurrentUpdates)
 {
     AtomicMetricGauge<> gauge;
     runConcurrently([&](i64 worker) { gauge.add(worker - 2); });
-    EXPECT_EQ(gauge.get(), -2 * samples_per_worker);
+    EXPECT_EQ(gauge.get(), -2 * static_cast<i64>(samples_per_worker));
 }
 
 }  // namespace

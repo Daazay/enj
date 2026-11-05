@@ -4,6 +4,7 @@
 #include <realm/base/common/result.hpp>
 #include <realm/base/common/string_literal.hpp>
 
+#include <algorithm>
 #include <array>
 #include <string_view>
 #include <type_traits>
@@ -31,14 +32,7 @@ private:
     template<typename T, usize N>
     RE_NODISCARD static constexpr bool hasEmpty(std::array<T, N> const& values)
     {
-        for (auto const& value : values)
-        {
-            if (value.empty())
-            {
-                return true;
-            }
-        }
-        return false;
+        return std::ranges::any_of(values, [](auto const& value) { return value.empty(); });
     }
 
     template<typename T, usize N>

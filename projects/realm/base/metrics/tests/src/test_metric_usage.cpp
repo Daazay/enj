@@ -35,8 +35,10 @@ TEST(MetricUsageTest, RuntimeLookupsKeepRepeatedMetricTypesDistinct)
     auto frames     = metrics.get(MetricId::frames);
     auto draw_calls = metrics.getByName("draw_calls");
 
-    ASSERT_TRUE(frames);
-    ASSERT_TRUE(draw_calls);
+    if (!frames || !draw_calls)
+    {
+        FAIL() << "Expected both counter metrics";
+    }
     ASSERT_EQ(frames->index(), 0u);
     ASSERT_EQ(draw_calls->index(), 1u);
 
@@ -61,8 +63,10 @@ TEST(MetricUsageTest, ConstLookupsExposeCurrentValues)
     auto by_id   = view.get(MetricId::draw_calls);
     auto by_name = view.getByName("draw_calls");
 
-    ASSERT_TRUE(by_id);
-    ASSERT_TRUE(by_name);
+    if (!by_id || !by_name)
+    {
+        FAIL() << "Expected lookup by ID and name to succeed";
+    }
     ASSERT_EQ(by_id->index(), 1u);
     ASSERT_EQ(by_name->index(), 1u);
     EXPECT_EQ(std::get<1>(*by_id).value.get(), 4u);
@@ -73,13 +77,12 @@ TEST(MetricUsageTest, UnknownRuntimeLookupsReturnEmpty)
 {
     EngineMetrics metrics;
 
-    auto const& view       = metrics;
-    auto const  unknown_id = static_cast<MetricId>(99);
+    auto const& view = metrics;
 
-    EXPECT_FALSE(metrics.get(unknown_id));
+    EXPECT_FALSE(metrics.get(unknown_metric_id));
     EXPECT_FALSE(metrics.getByName("missing"));
     EXPECT_FALSE(metrics.getByName(""));
-    EXPECT_FALSE(view.get(unknown_id));
+    EXPECT_FALSE(view.get(unknown_metric_id));
     EXPECT_FALSE(view.getByName("missing"));
     EXPECT_FALSE(view.getByName(""));
 }
@@ -90,7 +93,10 @@ TEST(MetricUsageTest, ObservesAndResetsConfiguredMetric)
 
     auto histogram = metrics.getByName("frame_time");
 
-    ASSERT_TRUE(histogram);
+    if (!histogram)
+    {
+        FAIL() << "Expected the frame-time histogram";
+    }
     ASSERT_EQ(histogram->index(), 2u);
 
     std::get<2>(*histogram).value.observe(15);

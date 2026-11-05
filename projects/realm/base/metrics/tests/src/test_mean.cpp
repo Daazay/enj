@@ -20,7 +20,7 @@ TYPED_TEST_SUITE(MetricMeanTest, StoragePolicies);
 
 TYPED_TEST(MetricMeanTest, ReturnsZeroWithoutSamples)
 {
-    MetricMean<i64, TypeParam> mean;
+    MetricMean<i64, TypeParam> const mean;
     EXPECT_DOUBLE_EQ(mean.get(), 0.0);
     EXPECT_DOUBLE_EQ(mean.sum(), 0.0);
     EXPECT_EQ(mean.count(), 0u);

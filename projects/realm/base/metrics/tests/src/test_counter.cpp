@@ -20,7 +20,7 @@ TYPED_TEST_SUITE(MetricCounterTest, StoragePolicies);
 
 TYPED_TEST(MetricCounterTest, StartsAtConfiguredValue)
 {
-    MetricCounter<u64, 5, TypeParam> counter;
+    MetricCounter<u64, 5, TypeParam> const counter;
     EXPECT_EQ(counter.get(), 5u);
 }
 

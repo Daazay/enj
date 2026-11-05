@@ -1,6 +1,7 @@
 ---
 SystemHeaders: false
 HeaderFilterRegex: 'projects/.*/(include|src)'
+ExcludeHeaderFilterRegex: '(^|/)[.]xmake/packages/'
 
 Checks: >
   bugprone-*,
@@ -34,6 +35,7 @@ Checks: >
   -readability-identifier-length,
   -readability-function-cognitive-complexity,
   -readability-else-after-return,
+  -readability-static-accessed-through-instance,
   misc-*,
   -misc-include-cleaner,
   -misc-non-private-member-variables-in-classes,

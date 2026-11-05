@@ -55,4 +55,6 @@ namespace realm::base::metrics::tests
 
 using EngineMetrics = MetricStorage<MetricId>;
 
+inline constexpr MetricId unknown_metric_id = static_cast<MetricId>(99);
+
 }  // namespace realm::base::metrics::tests
