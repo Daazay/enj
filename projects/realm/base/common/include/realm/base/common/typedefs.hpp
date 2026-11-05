@@ -142,4 +142,9 @@ inline constexpr usize cache_line_size = REALM_CACHE_LINE_SIZE;
 static_assert(cache_line_size >= 16, "cache_line_size must be a reasonable power-of-two constant");
 static_assert((cache_line_size & (cache_line_size - 1)) == 0, "cache_line_size must be a power of two");
 
+//
+
+template<typename...>
+inline constexpr bool always_false = false;
+
 }  // namespace realm

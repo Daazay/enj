@@ -35,28 +35,32 @@ SortIncludes: true
 IncludeBlocks: Regroup
 IncludeCategories:
   # realm headers "realm/*"
-  - Regex:           '^"realm/.*"'
-    Priority:        1
+  - Regex:    '^"realm/.*"'
+    Priority: 1
 
   # other headers "*"
-  - Regex:           '^".*"'
-    Priority:        2
+  - Regex:    '^".*"'
+    Priority: 2
 
   # realm headers <realm/*>
-  - Regex:           '^<realm/.*>'
-    Priority:        3
+  - Regex:    '^<realm/.*>'
+    Priority: 3
 
-  # system headers <header>
-  - Regex:           '^<[^/]*>$'
-    Priority:        4
+  # extensionless standard headers <header>
+  - Regex:    '^<[^/.]+>$'
+    Priority: 4
 
-  # third-party headers <lib/header>
-  - Regex:           '^<.*>$'
-    Priority:        5
+  # third-party headers <header.h> or <header.hpp>
+  - Regex:    '^<.*[.](h|hpp)>$'
+    Priority: 5
 
-  # fallback
-  - Regex:           '.*'
-    Priority:        6
+  # fallback for other angle-bracket headers
+  - Regex:    '^<.*>$'
+    Priority: 6
+
+  # final fallback
+  - Regex:    '.*'
+    Priority: 7
 
 SpaceAfterTemplateKeyword: false
 SpacesBeforeTrailingComments: 2
