@@ -21,6 +21,7 @@ public:
     constexpr MetricMean() noexcept = default;
 
 public:
+    // With Atomic policy, sum/count are independent loads, not a consistent snapshot.
     RE_NODISCARD RE_FORCE_INLINE constexpr sum_type get() const noexcept
     {
         auto const sample_count = _count.load();
@@ -42,6 +43,7 @@ public:
     }
 
 public:
+    // Coordinate with readers and writers externally to establish a coherent measurement interval.
     RE_FORCE_INLINE constexpr void reset() noexcept
     {
         _sum.reset();
@@ -54,6 +56,6 @@ private:
 };
 
 template<traits::MetricNumber T = f32>
-using AtomicMetricMean = MetricMean<T, StoragePolicy::Safe>;
+using AtomicMetricMean = MetricMean<T, StoragePolicy::Atomic>;
 
 }  // namespace realm::base::metrics

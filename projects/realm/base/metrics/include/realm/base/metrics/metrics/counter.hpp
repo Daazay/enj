@@ -35,6 +35,6 @@ private:
 };
 
 template<traits::MetricNumber T = u64, T InitialValue = T{}>
-using AtomicMetricCounter = MetricCounter<T, InitialValue, StoragePolicy::Safe>;
+using AtomicMetricCounter = MetricCounter<T, InitialValue, StoragePolicy::Atomic>;
 
 }  // namespace realm::base::metrics

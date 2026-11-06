@@ -11,7 +11,7 @@
 namespace realm::base::metrics::tests
 {
 
-using StoragePolicies = ::testing::Types<StoragePolicy::Unsafe, StoragePolicy::Safe>;
+using StoragePolicies = ::testing::Types<StoragePolicy::Unsafe, StoragePolicy::Atomic>;
 
 inline constexpr i64 worker_count       = 4;
 inline constexpr u64 samples_per_worker = 2000;

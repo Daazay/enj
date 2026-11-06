@@ -59,7 +59,7 @@ private:
     static constexpr auto ids   = std::array<MetricId, sizeof...(Descriptors)>{ Descriptors::id... };
     static constexpr auto names = std::array<std::string_view, sizeof...(Descriptors)>{ Descriptors::name... };
 
-    static_assert(sizeof...(Descriptors) > 0, "metric storage requires at least one reflected ID");
+    static_assert(sizeof...(Descriptors) > 0, "metric storage requires at least one ID");
     static_assert(!hasDuplicates(ids), "metric IDs must be unique");
     static_assert(!hasEmpty(names), "metric names must be non-empty");
     static_assert(!hasDuplicates(names), "metric names must be unique");

@@ -4,6 +4,7 @@
 #include <realm/base/metrics/detail/metric_reference.hpp>
 #include <realm/base/metrics/detail/metric_schema.hpp>
 
+#include <memory>
 #include <tuple>
 #include <utility>
 
@@ -86,6 +87,45 @@ public:
     void getByName() const&& = delete;
 
 public:
+    // Runtime lookups return a borrowed pointer, or nullptr for an unknown ID/name or type mismatch.
+    // The pointer remains valid only while this storage exists.
+    template<typename Metric>
+    RE_NODISCARD constexpr Metric* find(MetricId id) & noexcept
+    {
+        return pointerAt<Metric>(*this, indexOf(id).value_or(metrics_count));
+    }
+
+    template<typename Metric>
+    RE_NODISCARD constexpr Metric const* find(MetricId id) const& noexcept
+    {
+        return pointerAt<Metric>(*this, indexOf(id).value_or(metrics_count));
+    }
+
+    template<typename Metric>
+    Metric* find(MetricId) && = delete;
+
+    template<typename Metric>
+    Metric const* find(MetricId) const&& = delete;
+
+    template<typename Metric>
+    RE_NODISCARD constexpr Metric* findByName(std::string_view name) & noexcept
+    {
+        return pointerAt<Metric>(*this, indexOfName(name).value_or(metrics_count));
+    }
+
+    template<typename Metric>
+    RE_NODISCARD constexpr Metric const* findByName(std::string_view name) const& noexcept
+    {
+        return pointerAt<Metric>(*this, indexOfName(name).value_or(metrics_count));
+    }
+
+    template<typename Metric>
+    Metric* findByName(std::string_view) && = delete;
+
+    template<typename Metric>
+    Metric const* findByName(std::string_view) const&& = delete;
+
+public:
     RE_NODISCARD constexpr Opt<any_metric_ref> get(MetricId id) & noexcept
     {
         return referenceAt<any_metric_ref>(*this, indexOf(id).value_or(metrics_count));
@@ -114,6 +154,26 @@ public:
     RE_NODISCARD Opt<any_metric_const_ref> getByName(std::string_view) const&& = delete;
 
 private:
+    template<typename Metric, usize Index = 0, typename Self>
+    RE_NODISCARD static constexpr auto pointerAt(Self& self, usize index) noexcept
+        -> std::conditional_t<std::is_const_v<Self>, Metric const*, Metric*>
+    {
+        static_assert(std::is_same_v<Metric, std::remove_cvref_t<Metric>>, "find requires an unqualified metric type");
+        if constexpr (Index < metrics_count)
+        {
+            if (Index == index)
+            {
+                if constexpr (std::is_same_v<Metric, typename std::tuple_element_t<Index, store_type>::metric_type>)
+                {
+                    return std::addressof(std::get<Index>(self._store).metric);
+                }
+                return nullptr;
+            }
+            return pointerAt<Metric, Index + 1>(self, index);
+        }
+        return nullptr;
+    }
+
     template<typename Reference, usize Index = 0, typename Self>
     RE_NODISCARD static constexpr Opt<Reference> referenceAt(Self& self, usize index) noexcept
     {
@@ -132,28 +192,18 @@ private:
     store_type _store{};
 };
 
-template<typename MetricId, typename Seq>
-struct ReflectedMetricStorage;
-
-template<typename MetricId, usize... Is>
-struct ReflectedMetricStorage<MetricId, std::index_sequence<Is...>>
-{
-public:
-    using type = MetricStorageData<MetricId, MetricDescriptor<magic_enum::enum_value<MetricId, Is>()>...>;
-};
-
 }  // namespace realm::base::metrics::detail
 
 namespace realm::base::metrics
 {
 
-template<typename MetricId>
-class MetricStorage
-    : public detail::ReflectedMetricStorage<MetricId,
-                                            std::make_index_sequence<magic_enum::enum_count<MetricId>()>>::type
+// The explicit list defines membership and iteration order. All IDs have the same enum type.
+template<auto FirstId, decltype(FirstId)... Ids>
+class MetricStorage : public detail::MetricStorageData<decltype(FirstId), detail::MetricDescriptor<FirstId>,
+                                                       detail::MetricDescriptor<Ids>...>
 {
 private:
-    static_assert(std::is_enum_v<MetricId>, "MetricStorage requires an enum ID type");
+    static_assert(std::is_enum_v<decltype(FirstId)>, "MetricStorage requires enum IDs");
 };
 
 }  // namespace realm::base::metrics

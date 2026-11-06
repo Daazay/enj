@@ -35,6 +35,6 @@ private:
 };
 
 template<traits::MetricNumber T = i64, T InitialValue = max_value<T>>
-using AtomicMetricMin = MetricMin<T, InitialValue, StoragePolicy::Safe>;
+using AtomicMetricMin = MetricMin<T, InitialValue, StoragePolicy::Atomic>;
 
 }  // namespace realm::base::metrics

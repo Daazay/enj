@@ -8,12 +8,12 @@
 namespace realm::base::metrics::tests
 {
 
-enum class MetricId : u8
+enum class MetricId : u32
 {
     frames          = 2,
-    draw_calls      = 7,
-    frame_time      = 11,
-    active_entities = 15,
+    draw_calls      = 1000,
+    frame_time      = 50000,
+    active_entities = 70000,
 };
 
 }  // namespace realm::base::metrics::tests
@@ -53,7 +53,8 @@ struct MetricTraits<tests::MetricId::active_entities>
 namespace realm::base::metrics::tests
 {
 
-using EngineMetrics = MetricStorage<MetricId>;
+using EngineMetrics =
+    MetricStorage<MetricId::frames, MetricId::draw_calls, MetricId::frame_time, MetricId::active_entities>;
 
 inline constexpr MetricId unknown_metric_id = static_cast<MetricId>(99);
 

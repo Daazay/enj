@@ -3,6 +3,8 @@
 #include <realm/base/metrics/metric_value_storage.hpp>
 
 #include <array>
+#include <cmath>
+#include <cstdlib>
 
 namespace realm::base::metrics
 {
@@ -24,16 +26,27 @@ public:
     static constexpr usize bucket_count = BucketCount;
 
 public:
-    constexpr MetricHistogram() noexcept = default;
-    constexpr MetricHistogram(bounds_type bounds) noexcept
+    MetricHistogram() = delete;
+
+    // Boundaries are configuration: validate them at compile time, never on the observation path.
+    consteval MetricHistogram(bounds_type bounds) noexcept
         : _bounds{ bounds }
     {
+        for (usize i = 0; i < _bounds.size(); ++i)
+        {
+            if (!std::isfinite(_bounds[i]) || (i > 0 && !(_bounds[i - 1] < _bounds[i])))
+            {
+                // A non-constant call rejects construction with invalid bounds during compilation.
+                boundsMustBeFiniteAndStrictlyIncreasing();
+            }
+        }
     }
 
 public:
     RE_NODISCARD constexpr T          bound(usize idx) const noexcept { return _bounds[idx]; }
     RE_NODISCARD constexpr count_type count(usize idx) const noexcept { return _counts[idx].load(); }
 
+    // With Atomic policy, buckets are loaded independently, not as a consistent snapshot.
     RE_NODISCARD constexpr count_type total() const noexcept
     {
         count_type total{};
@@ -59,6 +72,7 @@ public:
     }
 
 public:
+    // Coordinate with readers and writers externally to establish a coherent measurement interval.
     RE_FORCE_INLINE constexpr void reset() noexcept
     {
         for (auto& bucket : _counts)
@@ -68,11 +82,13 @@ public:
     }
 
 private:
+    [[noreturn]] static void boundsMustBeFiniteAndStrictlyIncreasing() noexcept { std::abort(); }
+
     bounds_type                           _bounds{};
     std::array<storage_type, BucketCount> _counts{};
 };
 
 template<traits::MetricNumber T = f32, usize BucketCount = 10>
-using AtomicMetricHistogram = MetricHistogram<T, BucketCount, StoragePolicy::Safe>;
+using AtomicMetricHistogram = MetricHistogram<T, BucketCount, StoragePolicy::Atomic>;
 
 }  // namespace realm::base::metrics

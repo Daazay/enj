@@ -1,7 +1,6 @@
 #include "metric_test_declarations.hpp"
 
 #include <memory>
-#include <variant>
 
 #include <gtest/gtest.h>
 
@@ -32,18 +31,18 @@ TEST(MetricUsageTest, RuntimeLookupsKeepRepeatedMetricTypesDistinct)
 {
     EngineMetrics metrics;
 
-    auto frames     = metrics.get(MetricId::frames);
-    auto draw_calls = metrics.getByName("draw_calls");
+    auto* frames     = metrics.find<AtomicMetricCounter<>>(MetricId::frames);
+    auto* draw_calls = metrics.findByName<AtomicMetricCounter<>>("draw_calls");
 
-    if (!frames || !draw_calls)
+    if (frames == nullptr || draw_calls == nullptr)
     {
         FAIL() << "Expected both counter metrics";
     }
-    ASSERT_EQ(frames->index(), 0u);
-    ASSERT_EQ(draw_calls->index(), 1u);
+    EXPECT_EQ(frames, std::addressof(metrics.get<MetricId::frames>()));
+    EXPECT_EQ(draw_calls, std::addressof(metrics.get<MetricId::draw_calls>()));
 
-    std::get<0>(*frames).value.inc();
-    std::get<1>(*draw_calls).value.add(3);
+    frames->inc();
+    draw_calls->add(3);
 
     EXPECT_EQ(metrics.get<MetricId::frames>().get(), 1u);
     EXPECT_EQ(metrics.get<MetricId::draw_calls>().get(), 3u);
@@ -60,17 +59,16 @@ TEST(MetricUsageTest, ConstLookupsExposeCurrentValues)
     EXPECT_EQ(view.get<MetricId::draw_calls>().get(), 4u);
     EXPECT_EQ(view.getByName<"draw_calls">().get(), 4u);
 
-    auto by_id   = view.get(MetricId::draw_calls);
-    auto by_name = view.getByName("draw_calls");
+    auto by_id   = view.find<AtomicMetricCounter<>>(MetricId::draw_calls);
+    auto by_name = view.findByName<AtomicMetricCounter<>>("draw_calls");
 
     if (!by_id || !by_name)
     {
         FAIL() << "Expected lookup by ID and name to succeed";
     }
-    ASSERT_EQ(by_id->index(), 1u);
-    ASSERT_EQ(by_name->index(), 1u);
-    EXPECT_EQ(std::get<1>(*by_id).value.get(), 4u);
-    EXPECT_EQ(std::get<1>(*by_name).value.get(), 4u);
+    EXPECT_EQ(by_id, by_name);
+    EXPECT_EQ(by_id->get(), 4u);
+    EXPECT_EQ(by_name->get(), 4u);
 }
 
 TEST(MetricUsageTest, UnknownRuntimeLookupsReturnEmpty)
@@ -79,27 +77,25 @@ TEST(MetricUsageTest, UnknownRuntimeLookupsReturnEmpty)
 
     auto const& view = metrics;
 
-    EXPECT_FALSE(metrics.get(unknown_metric_id));
-    EXPECT_FALSE(metrics.getByName("missing"));
-    EXPECT_FALSE(metrics.getByName(""));
-    EXPECT_FALSE(view.get(unknown_metric_id));
-    EXPECT_FALSE(view.getByName("missing"));
-    EXPECT_FALSE(view.getByName(""));
+    EXPECT_FALSE(metrics.find<AtomicMetricCounter<>>(unknown_metric_id));
+    EXPECT_FALSE(metrics.findByName<AtomicMetricCounter<>>("missing"));
+    EXPECT_FALSE(metrics.findByName<AtomicMetricCounter<>>(""));
+    EXPECT_FALSE(view.find<AtomicMetricCounter<>>(unknown_metric_id));
+    EXPECT_FALSE(view.findByName<AtomicMetricCounter<>>("missing"));
+    EXPECT_FALSE(view.findByName<AtomicMetricCounter<>>(""));
 }
 
 TEST(MetricUsageTest, ObservesAndResetsConfiguredMetric)
 {
     EngineMetrics metrics;
 
-    auto histogram = metrics.getByName("frame_time");
+    auto histogram = metrics.findByName<AtomicMetricHistogram<i64, 3>>("frame_time");
 
     if (!histogram)
     {
         FAIL() << "Expected the frame-time histogram";
     }
-    ASSERT_EQ(histogram->index(), 2u);
-
-    std::get<2>(*histogram).value.observe(15);
+    histogram->observe(15);
     auto& stored = metrics.get<MetricId::frame_time>();
 
     EXPECT_EQ(stored.count(1), 1u);
@@ -121,4 +117,58 @@ TEST(MetricUsageTest, StorageInstancesHaveIndependentValues)
 
     EXPECT_EQ(second.get<MetricId::frames>().get(), 0u);
     EXPECT_EQ(second.get<MetricId::active_entities>().get(), 5);
+}
+
+TEST(MetricUsageTest, RuntimeTypeMismatchesReturnNullWithoutChangingMetrics)
+{
+    EngineMetrics metrics;
+    auto const&   view = metrics;
+
+    EXPECT_EQ(metrics.find<AtomicMetricCounter<>>(MetricId::active_entities), nullptr);
+    EXPECT_EQ(metrics.findByName<AtomicMetricCounter<>>("active_entities"), nullptr);
+    EXPECT_EQ(view.find<AtomicMetricCounter<>>(MetricId::active_entities), nullptr);
+    EXPECT_EQ(view.findByName<AtomicMetricCounter<>>("active_entities"), nullptr);
+
+    auto* gauge = metrics.find<MetricGauge<i64, 5>>(MetricId::active_entities);
+    ASSERT_NE(gauge, nullptr);
+    gauge->set(12);
+    EXPECT_EQ(metrics.get<MetricId::active_entities>().get(), 12);
+    EXPECT_EQ(metrics.get<MetricId::frames>().get(), 0u);
+}
+
+TEST(MetricUsageTest, OverlappingSubsetsHaveIndependentValuesAndExplicitOrder)
+{
+    using ClientMetrics = MetricStorage<MetricId::frames, MetricId::draw_calls>;
+    using ServerMetrics = MetricStorage<MetricId::active_entities, MetricId::frames>;
+
+    ClientMetrics client;
+    ServerMetrics server;
+
+    client.get<MetricId::frames>().add(2);
+    server.get<MetricId::frames>().add(7);
+    client.getByName<"draw_calls">().inc();
+    server.get<MetricId::active_entities>().set(100);
+
+    EXPECT_EQ(client.get<MetricId::frames>().get(), 2u);
+    EXPECT_EQ(server.get<MetricId::frames>().get(), 7u);
+    EXPECT_EQ(client.get<MetricId::draw_calls>().get(), 1u);
+    EXPECT_EQ(server.get<MetricId::active_entities>().get(), 100);
+    EXPECT_EQ(ClientMetrics::metrics_count, 2u);
+    EXPECT_EQ(ServerMetrics::metrics_count, 2u);
+    EXPECT_EQ(ClientMetrics::idAt(0), MetricId::frames);
+    EXPECT_EQ(ServerMetrics::idAt(0), MetricId::active_entities);
+    EXPECT_EQ(ServerMetrics::nameAt(1), "frames");
+
+    auto const& view = server;
+    EXPECT_EQ(server.find<AtomicMetricCounter<>>(MetricId::draw_calls), nullptr);
+    EXPECT_EQ(view.findByName<AtomicMetricCounter<>>("draw_calls"), nullptr);
+    EXPECT_FALSE(server.get(MetricId::draw_calls));
+    EXPECT_FALSE(view.getByName("draw_calls"));
+
+    // A requested type can also be absent from the entire subset.
+    using Histogram = AtomicMetricHistogram<i64, 3>;
+    EXPECT_EQ(server.find<Histogram>(MetricId::frame_time), nullptr);
+    EXPECT_EQ(view.findByName<Histogram>("frame_time"), nullptr);
+    EXPECT_FALSE(ServerMetrics::indexOf(MetricId::draw_calls));
+    EXPECT_FALSE(ClientMetrics::idByName("active_entities"));
 }

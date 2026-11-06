@@ -27,25 +27,30 @@ public:
     static constexpr metric_id        id   = Id;
     static constexpr std::string_view name = []
     {
-        if constexpr (requires {
-                          { metric_traits::name } -> std::convertible_to<std::string_view>;
-                      })
+        if constexpr (requires { metric_traits::name; })
         {
+            static_assert(
+                requires {
+                    { metric_traits::name } -> std::convertible_to<std::string_view>;
+                }, "MetricTraits::name must be convertible to std::string_view");
             return std::string_view{ metric_traits::name };
         }
         else
         {
-            return magic_enum::enum_name(Id);
+            // The compile-time overload names this ID directly, without scanning an enum range.
+            return magic_enum::enum_name<Id>();
         }
     }();
 
 private:
     static consteval metric_type makeMetric()
     {
-        if constexpr (requires {
-                          { metric_traits::make() } noexcept -> std::same_as<metric_type>;
-                      })
+        if constexpr (requires { metric_traits::make; } || requires { metric_traits::make(); })
         {
+            static_assert(
+                requires {
+                    { metric_traits::make() } noexcept -> std::same_as<metric_type>;
+                }, "MetricTraits::make must take no arguments, be noexcept, and return metric_type");
             return metric_traits::make();
         }
         else if constexpr (std::is_default_constructible_v<metric_type>)

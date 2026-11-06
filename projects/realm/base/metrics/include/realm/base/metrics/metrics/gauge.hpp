@@ -38,6 +38,6 @@ private:
 };
 
 template<traits::MetricNumber T = i64, T InitialValue = T{}>
-using AtomicMetricGauge = MetricGauge<T, InitialValue, StoragePolicy::Safe>;
+using AtomicMetricGauge = MetricGauge<T, InitialValue, StoragePolicy::Atomic>;
 
 }  // namespace realm::base::metrics

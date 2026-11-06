@@ -27,13 +27,14 @@ public:
     {
     };
 
-    // Individual values use relaxed, lock-free atomics;
-    // compound reads are not snapshots.
-    struct Safe final
+    // Individual values use relaxed, lock-free atomics; compound reads are not snapshots.
+    // This does not synchronize unrelated data. Coherent collection/reset requires external coordination.
+    struct Atomic final
     {
     };
 };
 
+// Integer arithmetic results must remain representable. No overflow handling is provided.
 template<typename Policy, traits::MetricNumber T, T InitialValue = T{}>
 struct MetricValueStorage;
 
@@ -53,6 +54,12 @@ public:
     {
     }
 
+    // A metric owns its accumulated state. Copying it would silently detach updates from its store.
+    MetricValueStorage(MetricValueStorage const&)            = delete;
+    MetricValueStorage& operator=(MetricValueStorage const&) = delete;
+    MetricValueStorage(MetricValueStorage&&)                 = delete;
+    MetricValueStorage& operator=(MetricValueStorage&&)      = delete;
+
 public:
     RE_NODISCARD RE_FORCE_INLINE constexpr value_type load() const noexcept { return _value; }
 
@@ -71,14 +78,14 @@ private:
 };
 
 template<traits::MetricNumber T, T InitialValue>
-struct MetricValueStorage<StoragePolicy::Safe, T, InitialValue>
+struct MetricValueStorage<StoragePolicy::Atomic, T, InitialValue>
 {
 public:
     static_assert(std::atomic<T>::is_always_lock_free);
 
 public:
     using value_type = T;
-    using policy     = StoragePolicy::Safe;
+    using policy     = StoragePolicy::Atomic;
 
     static constexpr value_type initial_value = InitialValue;
 
