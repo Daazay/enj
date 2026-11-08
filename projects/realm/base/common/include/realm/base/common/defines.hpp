@@ -134,3 +134,7 @@
     #define RE_WARNING_POP()
     #define RE_WARNING_DISABLE(wrn)
 #endif
+
+// Misc
+
+#define RE_IGNORE(x) (void)(x)
