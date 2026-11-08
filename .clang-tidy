@@ -1,6 +1,7 @@
 ---
 SystemHeaders: false
 HeaderFilterRegex: 'projects/.*/(include|src)'
+ExcludeHeaderFilterRegex: '(^|/)[.]xmake/packages/'
 
 Checks: >
   bugprone-*,
@@ -28,12 +29,14 @@ Checks: >
   -cppcoreguidelines-avoid-c-arrays,
   -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
   readability-*,
+  -readability-identifier-naming,
   -readability-magic-numbers,
   -readability-redundant-access-specifiers,
   -readability-uppercase-literal-suffix,
   -readability-identifier-length,
   -readability-function-cognitive-complexity,
   -readability-else-after-return,
+  -readability-static-accessed-through-instance,
   misc-*,
   -misc-include-cleaner,
   -misc-non-private-member-variables-in-classes,

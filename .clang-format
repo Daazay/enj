@@ -46,17 +46,21 @@ IncludeCategories:
   - Regex:           '^<realm/.*>'
     Priority:        3
 
-  # system headers <header>
-  - Regex:           '^<[^/]*>$'
+  # extensionless standard headers <header>
+  - Regex:           '^<[^/.]+>$'
     Priority:        4
 
-  # third-party headers <lib/header>
-  - Regex:           '^<.*>$'
+  # third-party headers <header.h> or <header.hpp>
+  - Regex:           '^<.*[.](h|hpp)>$'
     Priority:        5
 
-  # fallback
-  - Regex:           '.*'
+  # fallback for other angle-bracket headers
+  - Regex:           '^<.*>$'
     Priority:        6
+
+  # final fallback
+  - Regex:           '.*'
+    Priority:        7
 
 SpaceAfterTemplateKeyword: false
 SpacesBeforeTrailingComments: 2
