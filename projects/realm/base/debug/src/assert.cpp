@@ -1,13 +1,11 @@
 #include "realm/base/debug/assert.hpp"
 
-#include "realm/base/common/defines.hpp"
-
-#include "fmt/base.h"
-
 #include <array>
 #include <atomic>
 #include <cstdlib>
 #include <utility>
+
+#include <fmt/base.h>
 
 #if defined(RE_PLATFORM_LINUX)
     #include <unistd.h>

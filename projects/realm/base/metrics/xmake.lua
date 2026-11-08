@@ -1,3 +1,5 @@
+includes("tests")
+
 target("realm-base-metrics")
     set_kind("static")
     add_includedirs("include", {public = true})
